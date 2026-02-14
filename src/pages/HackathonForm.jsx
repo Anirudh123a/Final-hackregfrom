@@ -104,9 +104,7 @@ export default function HackathonForm() {
     problemStatement: ""
   });
 
-  // MINIMUM 3 MEMBERS
   const [memberCount, setMemberCount] = useState(3);
-
   const [loading, setLoading] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState("");
@@ -118,12 +116,22 @@ export default function HackathonForm() {
     setTimeout(() => {
       setToastMsg("");
       setToastType("");
-    }, 3500);
+    }, 2500);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const upperFields = ["teamName", "institutionName", "institutionCity"];
+
+    // ✅ ALL NAME FIELDS CAPS
+    const upperFields = [
+      "teamName",
+      "institutionName",
+      "institutionCity",
+      "leaderName",
+      "member2Name",
+      "member3Name",
+      "member4Name"
+    ];
 
     if (name === "domain") {
       setFormData((prev) => ({
@@ -140,6 +148,12 @@ export default function HackathonForm() {
     }));
   };
 
+  const validateMobileRange = (mobile) => {
+    if (mobile.length !== 10) return false;
+    const num = Number(mobile);
+    return num >= 5555555555 && num <= 9999999999;
+  };
+
   const validateForm = () => {
     if (!formData.teamName.trim()) return "Please enter Team Name";
     if (!formData.institutionName.trim()) return "Please enter Institution Name";
@@ -154,19 +168,16 @@ export default function HackathonForm() {
     if (!formData.leaderMobile.trim()) return "Please enter Leader Mobile";
     if (!formData.leaderEmail.trim()) return "Please enter Leader Email";
 
-    // MEMBER2 REQUIRED
     if (!formData.member2Name.trim()) return "Please enter Member 2 Name";
     if (!formData.member2Gender.trim()) return "Please select Member 2 Gender";
     if (!formData.member2Mobile.trim()) return "Please enter Member 2 Mobile";
     if (!formData.member2Email.trim()) return "Please enter Member 2 Email";
 
-    // MEMBER3 REQUIRED
     if (!formData.member3Name.trim()) return "Please enter Member 3 Name";
     if (!formData.member3Gender.trim()) return "Please select Member 3 Gender";
     if (!formData.member3Mobile.trim()) return "Please enter Member 3 Mobile";
     if (!formData.member3Email.trim()) return "Please enter Member 3 Email";
 
-    // MEMBER4 OPTIONAL BUT REQUIRED IF memberCount=4
     if (memberCount === 4) {
       if (!formData.member4Name.trim()) return "Please enter Member 4 Name";
       if (!formData.member4Gender.trim()) return "Please select Member 4 Gender";
@@ -177,11 +188,18 @@ export default function HackathonForm() {
     if (!formData.domain.trim()) return "Please select Domain";
     if (!formData.problemStatement.trim()) return "Please select Problem Statement";
 
-    if (formData.leaderMobile.length !== 10) return "Leader mobile must be 10 digits";
-    if (formData.member2Mobile.length !== 10) return "Member 2 mobile must be 10 digits";
-    if (formData.member3Mobile.length !== 10) return "Member 3 mobile must be 10 digits";
-    if (memberCount === 4 && formData.member4Mobile.length !== 10)
-      return "Member 4 mobile must be 10 digits";
+    // ✅ MOBILE NUMBER CHECKS
+    if (!validateMobileRange(formData.leaderMobile))
+      return "Leader mobile must be between 5555555555 and 9999999999";
+
+    if (!validateMobileRange(formData.member2Mobile))
+      return "Member 2 mobile must be between 5555555555 and 9999999999";
+
+    if (!validateMobileRange(formData.member3Mobile))
+      return "Member 3 mobile must be between 5555555555 and 9999999999";
+
+    if (memberCount === 4 && !validateMobileRange(formData.member4Mobile))
+      return "Member 4 mobile must be between 5555555555 and 9999999999";
 
     // Female Mandatory Rule
     const genders = [
@@ -209,8 +227,10 @@ export default function HackathonForm() {
 
     setLoading(true);
 
-    // Save full data in localStorage for payment page
-    localStorage.setItem("hackathonFormData", JSON.stringify({ ...formData, memberCount }));
+    localStorage.setItem(
+      "hackathonFormData",
+      JSON.stringify({ ...formData, memberCount })
+    );
 
     showToast("✅ Registration Validated! Redirecting to Payment...", "success");
 
@@ -268,13 +288,14 @@ export default function HackathonForm() {
       <div className="glow glow1"></div>
       <div className="glow glow2"></div>
 
+      {/* ✅ SMALL CENTER TOAST */}
       <AnimatePresence>
         {toastMsg && (
           <motion.div
             className={`toast ${toastType}`}
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85 }}
             transition={{ duration: 0.3 }}
           >
             {toastMsg}
@@ -422,7 +443,6 @@ export default function HackathonForm() {
               </div>
             </div>
 
-            {/* MEMBER 2 */}
             <h2 className="ultra-section">Member 2</h2>
 
             <div className="ultra-grid">
@@ -466,7 +486,6 @@ export default function HackathonForm() {
               </div>
             </div>
 
-            {/* MEMBER 3 */}
             <h2 className="ultra-section">Member 3</h2>
 
             <div className="ultra-grid">
@@ -510,7 +529,6 @@ export default function HackathonForm() {
               </div>
             </div>
 
-            {/* MEMBER 4 OPTIONAL */}
             <AnimatePresence>
               {memberCount === 4 && (
                 <motion.div
@@ -627,7 +645,6 @@ export default function HackathonForm() {
           </form>
         </motion.div>
 
-        {/* GUIDE SECTION (SAME DESIGN) */}
         <motion.div
           className="ultra-guide"
           initial={{ opacity: 0, x: 60 }}
@@ -638,26 +655,18 @@ export default function HackathonForm() {
 
           <div className="guide-card">
             <h3>👥 Team Rules</h3>
-            <p>
-              Minimum <b>3 Members</b> and Maximum <b>4 Members</b>.
-            </p>
-            <p>
-              At least <b>1 Female</b> member is mandatory.
-            </p>
+            <p>Minimum <b>3 Members</b> and Maximum <b>4 Members</b>.</p>
+            <p>At least <b>1 Female</b> member is mandatory.</p>
           </div>
 
           <div className="guide-card">
             <h3>📌 Domain Selection</h3>
-            <p>
-              Select the correct <b>Domain</b> and matching <b>Problem Statement</b>.
-            </p>
+            <p>Select correct <b>Domain</b> and matching <b>Problem Statement</b>.</p>
           </div>
 
           <div className="guide-card">
             <h3>🪪 Verification</h3>
-            <p>
-              Please bring your <b>College ID</b> on the event day.
-            </p>
+            <p>Please bring your <b>College ID</b> on event day.</p>
           </div>
 
           <div className="guide-card">
